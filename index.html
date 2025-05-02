@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Wyciąganie zdjęć</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #f90;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 15px;
+    }
+    input {
+      margin-bottom: 15px;
+    }
+    #framesContainer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    img {
+      max-width: 100px;
+      border: 2px solid #f90;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>SmartFramePicker</h1>
+  <input type="file" accept="video/*" id="videoInput" />
+  <video id="video" controls hidden></video>
+  <canvas id="canvas" hidden></canvas>
+  <div id="framesContainer"></div>
+
+  <script>
+    const videoInput = document.getElementById("videoInput");
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const container = document.getElementById("framesContainer");
+
+    videoInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const url = URL.createObjectURL(file);
+        video.src = url;
+        video.load();
+        video.addEventListener("loadeddata", extractFrames);
+      }
+    });
+
+    function extractFrames() {
+      const frameInterval = 2; // sekundy między klatkami
+      const totalFrames = Math.floor(video.duration / frameInterval);
+      let currentFrame = 0;
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      function processNext() {
+        if (currentFrame >= totalFrames) return;
+        video.currentTime = currentFrame * frameInterval;
+        video.onseeked = () => {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const sharpness = measureSharpness();
+          if (sharpness > 20) {
+            let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            imageData = enhanceImage(imageData);
+            ctx.putImageData(imageData, 0, 0);
+
+            const img = document.createElement("img");
+            img.src = canvas.toDataURL("image/jpeg", 0.95);
+            img.title = `Ostrość: ${sharpness.toFixed(2)}`;
+            img.onclick = () => {
+              const a = document.createElement("a");
+              a.href = img.src;
+              a.download = `frame_${currentFrame}.jpg`;
+              a.click();
+            };
+            container.appendChild(img);
+          }
+          currentFrame++;
+          processNext();
+        };
+      }
+
+      processNext();
+    }
+
+    function measureSharpness() {
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const gray = imageData.data;
+      let sum = 0;
+
+      for (let i = 0; i < gray.length; i += 4) {
+        const brightness = gray[i] * 0.299 + gray[i + 1] * 0.587 + gray[i + 2] * 0.114;
+        sum += brightness;
+      }
+
+      const avg = sum / (gray.length / 4);
+      let variance = 0;
+
+      for (let i = 0; i < gray.length; i += 4) {
+        const brightness = gray[i] * 0.299 + gray[i + 1] * 0.587 + gray[i + 2] * 0.114;
+        variance += (brightness - avg) ** 2;
+      }
+
+      return Math.sqrt(variance / (gray.length / 4));
+    }
+
+    function enhanceImage(imageData) {
+      const data = imageData.data;
+      const brightnessBoost = 15;
+      const contrastFactor = 1.2;
+      const saturationBoost = 0.3;
+
+      for (let i = 0; i < data.length; i += 4) {
+        // Jasność
+        data[i] += brightnessBoost;
+        data[i + 1] += brightnessBoost;
+        data[i + 2] += brightnessBoost;
+
+        // Kontrast
+        data[i] = (data[i] - 128) * contrastFactor + 128;
+        data[i + 1] = (data[i + 1] - 128) * contrastFactor + 128;
+        data[i + 2] = (data[i + 2] - 128) * contrastFactor + 128;
+
+        // Saturacja
+        const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+        data[i] += (data[i] - avg) * saturationBoost;
+        data[i + 1] += (data[i + 1] - avg) * saturationBoost;
+        data[i + 2] += (data[i + 2] - avg) * saturationBoost;
+
+        // Zakres 0-255
+        data[i] = Math.min(255, Math.max(0, data[i]));
+        data[i + 1] = Math.min(255, Math.max(0, data[i + 1]));
+        data[i + 2] = Math.min(255, Math.max(0, data[i + 2]));
+      }
+
+      return imageData;
+    }
+  </script>
+</body>
+</html>
