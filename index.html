@@ -1,151 +1,493 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Wyciąganie zdjęć</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: #f90;
-      text-align: center;
-      padding: 20px;
+<meta charset="UTF-8" />
+<title>Planner Zadań</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#e91e63" />
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #121212;
+    color: #eee;
+    margin: 0; padding: 20px;
+  }
+  .container {
+    max-width: 500px;
+    margin: auto;
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #e91e6390;
+  }
+  h1 {
+    text-align: center;
+    cursor: pointer;
+    margin-bottom: 0;
+    color: #e91e63;
+    user-select: none;
+    position: relative;
+  }
+  #dayTasksTitle {
+    text-align: center;
+    font-size: 1.3em;
+    color: #f48fb1;
+    margin: 10px 0 20px 0;
+    font-weight: 600;
+    user-select: none;
+  }
+  #codePrompt {
+    display: none;
+    margin-bottom: 20px;
+  }
+  #adminCodeInput {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #444;
+    border-radius: 5px;
+    background: #2c2c2c;
+    color: #eee;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+  #adminCodeInput:focus {
+    border-color: #777;
+  }
+  .admin-panel {
+    display: none;
+    margin-bottom: 20px;
+  }
+  .admin-panel.active {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .admin-panel input,
+  .admin-panel select {
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #444;
+    border-radius: 5px;
+    background: #2c2c2c;
+    color: #eee;
+    outline: none;
+    flex: 1 1 auto;
+    min-width: 100px;
+  }
+  .admin-panel select {
+    max-width: 120px;
+  }
+  .admin-panel button {
+    padding: 10px;
+    font-size: 16px;
+    background-color: #e91e63;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    user-select: none;
+    flex-shrink: 0;
+  }
+  .admin-panel button:hover {
+    background-color: #ad1457;
+  }
+  #hideAdminBtn {
+    background-color: #555;
+    padding: 10px 15px;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+  li {
+    background: #2c2c2c;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #eee;
+    user-select: none;
+    cursor: grab;
+  }
+  li.done {
+    background: #4a1e3d;
+    color: #f8bbd0;
+    text-decoration: line-through;
+  }
+  li.low {
+    border-left: 5px solid #80cbc4;
+  }
+  li.medium {
+    border-left: 5px solid #ffb74d;
+  }
+  li.high {
+    border-left: 5px solid #e91e63;
+  }
+  .task-info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .task-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .task-text {
+    font-weight: 600;
+    word-break: break-word;
+  }
+  .task-category {
+    font-size: 0.8em;
+    color: #f48fb1;
+    margin-left: 10px;
+    font-style: italic;
+  }
+  .task-priority {
+    font-size: 0.8em;
+    color: #ccc;
+  }
+  .check {
+    font-size: 22px;
+    color: #e91e63;
+    cursor: pointer;
+    margin-right: 15px;
+    user-select: none;
+    transition: color 0.3s ease;
+    flex-shrink: 0;
+  }
+  .check:hover {
+    color: #f48fb1;
+  }
+  .delete {
+    font-size: 22px;
+    color: #f06292;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.3s ease;
+    flex-shrink: 0;
+  }
+  .delete:hover {
+    color: #ec407a;
+  }
+  #taskCounter {
+    text-align: center;
+    margin-bottom: 15px;
+    color: #f48fb1;
+    font-weight: 600;
+    user-select: none;
+  }
+
+  /* Responsive */
+  @media screen and (max-width: 600px) {
+    .container {
+      width: 100%;
+      padding: 15px;
     }
-    h1 {
-      margin-bottom: 15px;
-    }
-    input {
-      margin-bottom: 15px;
-    }
-    #framesContainer {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
+    .admin-panel {
+      flex-direction: column;
       gap: 10px;
-      margin-top: 20px;
     }
-    img {
-      max-width: 100px;
-      border: 2px solid #f90;
-      cursor: pointer;
+    li {
+      flex-direction: column;
+      align-items: flex-start;
+      cursor: default;
     }
-  </style>
+    .check, .delete {
+      font-size: 28px;
+      margin-right: 10px;
+      margin-top: 5px;
+    }
+    .task-top {
+      width: 100%;
+      justify-content: flex-start;
+    }
+    .task-category {
+      margin-left: 0;
+      margin-top: 4px;
+    }
+  }
+</style>
 </head>
 <body>
-  <h1>SmartFramePicker</h1>
-  <input type="file" accept="video/*" id="videoInput" />
-  <video id="video" controls hidden></video>
-  <canvas id="canvas" hidden></canvas>
-  <div id="framesContainer"></div>
+<div class="container">
+  <h1 id="plannerTitle" title="Długie przytrzymanie wyświetla panel admina">Planner Zadań</h1>
+  <div id="dayTasksTitle">Ładuję datę...</div>
+  <div id="taskCounter">0 zadań wykonanych z 0</div>
 
-  <script>
-    const videoInput = document.getElementById("videoInput");
-    const video = document.getElementById("video");
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-    const container = document.getElementById("framesContainer");
+  <div id="codePrompt">
+    <input type="password" id="adminCodeInput" placeholder="Wpisz kod admina" />
+  </div>
 
-    videoInput.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const url = URL.createObjectURL(file);
-        video.src = url;
-        video.load();
-        video.addEventListener("loadeddata", extractFrames);
-      }
+  <div class="admin-panel" id="adminPanel">
+    <input type="text" id="newTaskInput" placeholder="Nowe zadanie..." />
+    <select id="categorySelect" title="Kategoria">
+      <option value="praca">Praca</option>
+      <option value="dom">Dom</option>
+      <option value="zakupy">Zakupy</option>
+      <option value="inne" selected>Inne</option>
+    </select>
+    <select id="prioritySelect" title="Priorytet">
+      <option value="low">Niski</option>
+      <option value="medium" selected>Średni</option>
+      <option value="high">Wysoki</option>
+    </select>
+    <button id="addTaskBtn">Dodaj</button>
+    <button id="hideAdminBtn" title="Ukryj panel">✖</button>
+  </div>
+
+  <ul id="taskList"></ul>
+</div>
+
+<script>
+  // Formatowanie daty dd.mm.yyyy
+  function formatDate(dateString) {
+    const d = new Date(dateString);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}.${month}.${year}`;
+  }
+
+  // Pobierz datę z internetu
+  async function loadNetworkDate() {
+    try {
+      const res = await fetch('http://worldtimeapi.org/api/ip');
+      if (!res.ok) throw new Error('Błąd sieci');
+      const data = await res.json();
+      const dateStr = formatDate(data.datetime);
+      document.getElementById('dayTasksTitle').textContent = `Zadania na dzień: ${dateStr}`;
+    } catch (e) {
+      console.warn('Nie udało się pobrać daty z internetu, używam lokalnej');
+      const now = new Date();
+      const day = String(now.getDate()).padStart(2, '0');
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const year = now.getFullYear();
+      document.getElementById('dayTasksTitle').textContent = `Zadania na dzień: ${day}.${month}.${year}`;
+    }
+  }
+
+  const taskListEl = document.getElementById('taskList');
+  const newTaskInput = document.getElementById('newTaskInput');
+  const addTaskBtn = document.getElementById('addTaskBtn');
+  const categorySelect = document.getElementById('categorySelect');
+  const prioritySelect = document.getElementById('prioritySelect');
+  const adminPanel = document.getElementById('adminPanel');
+  const codePrompt = document.getElementById('codePrompt');
+  const adminCodeInput = document.getElementById('adminCodeInput');
+  const plannerTitle = document.getElementById('plannerTitle');
+  const hideAdminBtn = document.getElementById('hideAdminBtn');
+  const taskCounter = document.getElementById('taskCounter');
+
+  let tasks = [];
+
+  // Ładuj zadania z localStorage
+  function loadTasks() {
+    const saved = localStorage.getItem('tasks');
+    tasks = saved ? JSON.parse(saved) : [];
+  }
+
+  // Zapisz zadania
+  function saveTasks() {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }
+
+  // Renderuj licznik zadań
+  function renderCounter() {
+    const doneCount = tasks.filter(t => t.done).length;
+    taskCounter.textContent = `${doneCount} zadań wykonanych z ${tasks.length}`;
+  }
+
+  // Renderuj listę zadań
+  function renderTasks() {
+    taskListEl.innerHTML = '';
+    tasks.forEach((task, index) => {
+      const li = document.createElement('li');
+      li.className = task.done ? 'done' : '';
+      li.classList.add(task.priority || 'medium');
+
+      // Tworzymy strukturę
+      const check = document.createElement('span');
+      check.innerHTML = task.done ? '✅' : '⬜';
+      check.className = 'check';
+      check.title = 'Odhacz/Zaznacz zadanie';
+      check.addEventListener('click', () => {
+        tasks[index].done = !tasks[index].done;
+        saveTasks();
+        renderTasks();
+        renderCounter();
+      });
+
+      const taskInfo = document.createElement('div');
+      taskInfo.className = 'task-info';
+
+      const taskTop = document.createElement('div');
+      taskTop.className = 'task-top';
+
+      const taskText = document.createElement('span');
+      taskText.className = 'task-text';
+      taskText.textContent = task.text;
+
+      const taskCategory = document.createElement('span');
+      taskCategory.className = 'task-category';
+      taskCategory.textContent = `(${task.category})`;
+
+      taskTop.appendChild(taskText);
+      taskTop.appendChild(taskCategory);
+      taskInfo.appendChild(taskTop);
+
+      // Priorytet wyświetlamy poniżej
+      const taskPriority = document.createElement('span');
+      taskPriority.className = 'task-priority';
+      let prioText = '';
+      if(task.priority === 'low') prioText = 'Priorytet: niski';
+      else if(task.priority === 'medium') prioText = 'Priorytet: średni';
+      else if(task.priority === 'high') prioText = 'Priorytet: wysoki';
+      taskPriority.textContent = prioText;
+      taskInfo.appendChild(taskPriority);
+
+      const del = document.createElement('span');
+      del.innerHTML = '🗑️';
+      del.className = 'delete';
+      del.title = 'Usuń zadanie';
+      del.addEventListener('click', () => {
+        if(confirm('Na pewno usunąć zadanie?')) {
+          tasks.splice(index, 1);
+          saveTasks();
+          renderTasks();
+          renderCounter();
+        }
+      });
+
+      li.appendChild(check);
+      li.appendChild(taskInfo);
+      li.appendChild(del);
+
+      // Do drag & drop:
+      li.setAttribute('draggable', true);
+      li.dataset.index = index;
+
+      taskListEl.appendChild(li);
     });
+    renderCounter();
+  }
 
-    function extractFrames() {
-      const frameInterval = 2; // sekundy między klatkami
-      const totalFrames = Math.floor(video.duration / frameInterval);
-      let currentFrame = 0;
+  // Dodaj zadanie
+  function addTask() {
+    const text = newTaskInput.value.trim();
+    if (!text) return alert('Wpisz tekst zadania!');
+    const category = categorySelect.value;
+    const priority = prioritySelect.value;
+    tasks.push({ text, category, priority, done: false });
+    saveTasks();
+    renderTasks();
+    newTaskInput.value = '';
+    newTaskInput.focus();
+  }
 
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+  addTaskBtn.addEventListener('click', addTask);
+  newTaskInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') addTask();
+  });
 
-      function processNext() {
-        if (currentFrame >= totalFrames) return;
-        video.currentTime = currentFrame * frameInterval;
-        video.onseeked = () => {
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          const sharpness = measureSharpness();
-          if (sharpness > 20) {
-            let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            imageData = enhanceImage(imageData);
-            ctx.putImageData(imageData, 0, 0);
+  // Panel admina - pokazuje się po długim przytrzymaniu tytułu
+  let pressTimer;
+  plannerTitle.addEventListener('mousedown', () => {
+    pressTimer = setTimeout(() => {
+      codePrompt.style.display = 'block';
+      adminCodeInput.focus();
+    }, 1000);
+  });
+  plannerTitle.addEventListener('mouseup', () => {
+    clearTimeout(pressTimer);
+  });
+  plannerTitle.addEventListener('mouseleave', () => {
+    clearTimeout(pressTimer);
+  });
 
-            const img = document.createElement("img");
-            img.src = canvas.toDataURL("image/jpeg", 0.95);
-            img.title = `Ostrość: ${sharpness.toFixed(2)}`;
-            img.onclick = () => {
-              const a = document.createElement("a");
-              a.href = img.src;
-              a.download = `frame_${currentFrame}.jpg`;
-              a.click();
-            };
-            container.appendChild(img);
-          }
-          currentFrame++;
-          processNext();
-        };
-      }
-
-      processNext();
+  adminCodeInput.addEventListener('keydown', e => {
+    if(e.key === 'Enter') {
+      checkAdminCode();
     }
+  });
 
-    function measureSharpness() {
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const gray = imageData.data;
-      let sum = 0;
-
-      for (let i = 0; i < gray.length; i += 4) {
-        const brightness = gray[i] * 0.299 + gray[i + 1] * 0.587 + gray[i + 2] * 0.114;
-        sum += brightness;
-      }
-
-      const avg = sum / (gray.length / 4);
-      let variance = 0;
-
-      for (let i = 0; i < gray.length; i += 4) {
-        const brightness = gray[i] * 0.299 + gray[i + 1] * 0.587 + gray[i + 2] * 0.114;
-        variance += (brightness - avg) ** 2;
-      }
-
-      return Math.sqrt(variance / (gray.length / 4));
+  function checkAdminCode() {
+    const code = adminCodeInput.value.trim();
+    if(code === '0909') {
+      adminPanel.classList.add('active');
+      codePrompt.style.display = 'none';
+      adminCodeInput.value = '';
+    } else {
+      alert('Nieprawidłowy kod');
     }
+  }
 
-    function enhanceImage(imageData) {
-      const data = imageData.data;
-      const brightnessBoost = 15;
-      const contrastFactor = 1.2;
-      const saturationBoost = 0.3;
+  hideAdminBtn.addEventListener('click', () => {
+    adminPanel.classList.remove('active');
+  });
 
-      for (let i = 0; i < data.length; i += 4) {
-        // Jasność
-        data[i] += brightnessBoost;
-        data[i + 1] += brightnessBoost;
-        data[i + 2] += brightnessBoost;
+  // Drag & Drop obsługa
+  let dragSrcEl = null;
 
-        // Kontrast
-        data[i] = (data[i] - 128) * contrastFactor + 128;
-        data[i + 1] = (data[i + 1] - 128) * contrastFactor + 128;
-        data[i + 2] = (data[i + 2] - 128) * contrastFactor + 128;
+  function handleDragStart(e) {
+    dragSrcEl = e.currentTarget;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', dragSrcEl.outerHTML);
+    dragSrcEl.classList.add('dragElem');
+  }
 
-        // Saturacja
-        const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-        data[i] += (data[i] - avg) * saturationBoost;
-        data[i + 1] += (data[i + 1] - avg) * saturationBoost;
-        data[i + 2] += (data[i + 2] - avg) * saturationBoost;
+  function handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+  }
 
-        // Zakres 0-255
-        data[i] = Math.min(255, Math.max(0, data[i]));
-        data[i + 1] = Math.min(255, Math.max(0, data[i + 1]));
-        data[i + 2] = Math.min(255, Math.max(0, data[i + 2]));
-      }
+  function handleDrop(e) {
+    e.stopPropagation();
 
-      return imageData;
+    if (dragSrcEl !== this) {
+      const fromIndex = parseInt(dragSrcEl.dataset.index);
+      const toIndex = parseInt(this.dataset.index);
+
+      // Zamiana zadań miejscami w tablicy
+      const temp = tasks[fromIndex];
+      tasks.splice(fromIndex, 1);
+      tasks.splice(toIndex, 0, temp);
+
+      saveTasks();
+      renderTasks();
     }
-  </script>
+    return false;
+  }
+
+  function handleDragEnd(e) {
+    e.currentTarget.classList.remove('dragElem');
+  }
+
+  function addDnDHandlers() {
+    const items = taskListEl.querySelectorAll('li');
+    items.forEach(item => {
+      item.addEventListener('dragstart', handleDragStart, false);
+      item.addEventListener('dragover', handleDragOver, false);
+      item.addEventListener('drop', handleDrop, false);
+      item.addEventListener('dragend', handleDragEnd, false);
+    });
+  }
+
+  // Render tasks + bind drag & drop po wyrenderowaniu
+  function renderTasksAndDnD() {
+    renderTasks();
+    addDnDHandlers();
+  }
+
+  loadNetworkDate();
+  loadTasks();
+  renderTasksAndDnD();
+</script>
 </body>
 </html>
