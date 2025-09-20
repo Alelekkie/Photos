@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="pl">
 <head>
 <meta charset="UTF-8" />
@@ -7,27 +7,16 @@
 <style>
   body { background: #000; color: #f48fb1; font-family: Arial, sans-serif; margin: 0; padding: 0; }
   header {
-  background: #f44336; /* początkowo czerwony */
-  color: #fff;
-  padding: 1em;
-  text-align: center;
-  font-size: 1.5em;
-  user-select: none;
-  transition: background-color 0.5s ease;
-}
-  #dayTasksTitle { font-size: clamp(1.2em, 6vw, 2em);
-    margin-top: 0.2em;
-    color: #f48fb1;
-    -webkit-text-stroke: 1px black;
-    text-stroke: 1px black;}
-    
-    #plannerTitle {
-       font-size: clamp(1.2em, 6vw, 2em);
-   
-    color: #f48fb1;
-    -webkit-text-stroke: 1px black;
-    text-stroke: 1px black;;
-    }
+    background: #f44336; /* początkowo czerwony */
+    color: #fff;
+    padding: 1em;
+    text-align: center;
+    font-size: 1.5em;
+    user-select: none;
+    transition: background-color 0.5s ease;
+  }
+  #dayTasksTitle { font-size: clamp(1.2em, 6vw, 2em); margin-top: 0.2em; color: black; }
+  #plannerTitle { font-size: clamp(1.2em, 6vw, 2em); color: black; }
   #taskList { list-style: none; padding: 0.5em; margin: 0; max-width: 600px; margin-left: auto; margin-right: auto; }
   #taskList li { background: #2b2b2b; margin: 0.4em 0; padding: 0.6em; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; word-wrap: break-word; }
   #taskList li.done { text-decoration: line-through; opacity: 0.6; }
@@ -85,6 +74,11 @@
       <option value="Klaudia">Klaudia</option>
       <option value="Inne">Inne</option>
     </select>
+
+    <label style="margin-left:0.5em;">
+      <input type="checkbox" id="dailyResetCheckbox" /> Resetuj codziennie
+    </label>
+
     <button id="addTaskBtn">Dodaj</button>
   </div>
 
@@ -99,7 +93,6 @@
   </div>
 
   <div id="taskCounter">Ładowanie zadań...</div>
-    
   <ul id="taskList"></ul>
 </div>
 
@@ -111,174 +104,167 @@
   <p>Panel admina aktywny. Możesz usuwać zadania klikając kosz.</p>
 </div>
 
-<!-- Firebase SDK (modular) -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-  import {
-    getDatabase,
-    ref,
-    onValue,
-    set,
-    update,
-    remove
-  } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getDatabase, ref, onValue, set, update, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCQPWSK9l8yI944dHTSSEW9-cLTZh4Uz-I",
-    authDomain: "zadanie-56c40.firebaseapp.com",
-    databaseURL: "https://zadanie-56c40-default-rtdb.firebaseio.com",
-    projectId: "zadanie-56c40",
-    storageBucket: "zadanie-56c40.appspot.com",
-    messagingSenderId: "551942794557",
-    appId: "1:551942794557:web:a6323df6e91c00cb226954"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyCQPWSK9l8yI944dHTSSEW9-cLTZh4Uz-I",
+  authDomain: "zadanie-56c40.firebaseapp.com",
+  databaseURL: "https://zadanie-56c40-default-rtdb.firebaseio.com",
+  projectId: "zadanie-56c40",
+  storageBucket: "zadanie-56c40.appspot.com",
+  messagingSenderId: "551942794557",
+  appId: "1:551942794557:web:a6323df6e91c00cb226954"
+};
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const tasksRef = ref(db, 'tasks');
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const tasksRef = ref(db, 'tasks');
 
-  const plannerTitle = document.getElementById('plannerTitle');
-  const dayTasksTitle = document.getElementById('dayTasksTitle');
-  const taskListEl = document.getElementById('taskList');
-  const newTaskInput = document.getElementById('newTaskInput');
-  const categorySelect = document.getElementById('categorySelect');
-  const prioritySelect = document.getElementById('prioritySelect');
-  const userSelect = document.getElementById('userSelect');
-  const addTaskBtn = document.getElementById('addTaskBtn');
-  const adminPanel = document.getElementById('adminPanel');
-  const codePrompt = document.getElementById('codePrompt');
-  const adminCodeInput = document.getElementById('adminCodeInput');
-  const hideAdminBtn = document.getElementById('hideAdminBtn');
-  const taskCounter = document.getElementById('taskCounter');
-  const addTaskSection = document.getElementById('addTaskSection');
-  const filterUser = document.getElementById('filterUser');
+const plannerTitle = document.getElementById('plannerTitle');
+const dayTasksTitle = document.getElementById('dayTasksTitle');
+const taskListEl = document.getElementById('taskList');
+const newTaskInput = document.getElementById('newTaskInput');
+const categorySelect = document.getElementById('categorySelect');
+const prioritySelect = document.getElementById('prioritySelect');
+const userSelect = document.getElementById('userSelect');
+const addTaskBtn = document.getElementById('addTaskBtn');
+const adminPanel = document.getElementById('adminPanel');
+const codePrompt = document.getElementById('codePrompt');
+const adminCodeInput = document.getElementById('adminCodeInput');
+const hideAdminBtn = document.getElementById('hideAdminBtn');
+const taskCounter = document.getElementById('taskCounter');
+const addTaskSection = document.getElementById('addTaskSection');
+const filterUser = document.getElementById('filterUser');
+const dailyResetCheckbox = document.getElementById('dailyResetCheckbox');
 
-  let tasks = {};
-  let isAdmin = false;
+let tasks = {};
+let isAdmin = false;
 
-  function loadNetworkDate() {
-    const now = new Date();
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    dayTasksTitle.textContent = now.toLocaleDateString('pl-PL', options);
-  }
+function loadNetworkDate() {
+  const now = new Date();
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  dayTasksTitle.textContent = now.toLocaleDateString('pl-PL', options);
+}
 
-  function renderTasks() {
-    taskListEl.innerHTML = '';
-    let doneCount = 0, totalCount = 0;
-    const selectedUser = filterUser.value;
+function renderTasks() {
+  taskListEl.innerHTML = '';
+  let doneCount = 0, totalCount = 0;
+  const selectedUser = filterUser.value;
 
-    for (const key in tasks) {
-      if (!tasks.hasOwnProperty(key)) continue;
-      const t = tasks[key];
-      if(selectedUser !== 'all' && t.assignedTo !== selectedUser) continue;
+  for(const key in tasks){
+    if(!tasks.hasOwnProperty(key)) continue;
+    const t = tasks[key];
+    if(selectedUser !== 'all' && t.assignedTo !== selectedUser) continue;
 
-      totalCount++;
-      if(t.done) doneCount++;
+    totalCount++;
+    if(t.done) doneCount++;
 
-      const li = document.createElement('li');
-      li.className = t.priority || 'medium';
-      if(t.done) li.classList.add('done');
+    const li = document.createElement('li');
+    li.className = t.priority || 'medium';
+    if(t.done) li.classList.add('done');
 
-      const check = document.createElement('span');
-      check.className = 'check';
-      check.textContent = t.done ? '✔️' : '☐';
-      check.addEventListener('click', ()=>update(ref(db, `tasks/${key}`), { done: !t.done }));
+    const check = document.createElement('span');
+    check.className = 'check';
+    check.textContent = t.done ? '✔️' : '☐';
+    check.addEventListener('click', ()=>update(ref(db, `tasks/${key}`), { done: !t.done }));
 
-      const infoDiv = document.createElement('div'); infoDiv.className = 'task-info';
-      const topDiv = document.createElement('div'); topDiv.className = 'task-top';
-      const taskText = document.createElement('span'); taskText.textContent = t.text;
-      const categorySpan = document.createElement('span'); categorySpan.className='task-category'; categorySpan.textContent=t.category||'';
-      topDiv.appendChild(taskText); topDiv.appendChild(categorySpan);
+    const infoDiv = document.createElement('div'); infoDiv.className = 'task-info';
+    const topDiv = document.createElement('div'); topDiv.className = 'task-top';
+    const taskText = document.createElement('span'); taskText.textContent = t.text;
+    const categorySpan = document.createElement('span'); categorySpan.className='task-category'; categorySpan.textContent=t.category||'';
+    topDiv.appendChild(taskText); topDiv.appendChild(categorySpan);
 
-      const prioritySpan = document.createElement('div'); prioritySpan.className='task-priority';
-      switch(t.priority){case 'high':prioritySpan.textContent='Priorytet: Wysoki';break;
+   
+
+    const prioritySpan = document.createElement('div'); prioritySpan.className='task-priority';
+    switch(t.priority){
+      case 'high':prioritySpan.textContent='Priorytet: Wysoki';break;
       case 'medium':prioritySpan.textContent='Priorytet: Średni';break;
-      case 'low':prioritySpan.textContent='Priorytet: Niski';break;}
-
-      const assignedSpan = document.createElement('div'); assignedSpan.className='task-assigned';
-      assignedSpan.textContent=`Przypisane do: ${t.assignedTo||'—'}`;
-
-      infoDiv.appendChild(topDiv);
-      infoDiv.appendChild(prioritySpan);
-      infoDiv.appendChild(assignedSpan);
-
-      li.appendChild(check);
-      li.appendChild(infoDiv);
-
-      if(isAdmin){
-        const delBtn=document.createElement('span'); delBtn.className='delete';
-        delBtn.textContent='🗑️'; delBtn.addEventListener('click',()=>{if(confirm("Usuń zadanie?")) remove(ref(db,`tasks/${key}`));});
-        li.appendChild(delBtn);
-      }
-
-      taskListEl.appendChild(li);
+      case 'low':prioritySpan.textContent='Priorytet: Niski';break;
     }
 
-    taskCounter.textContent = totalCount===0?"Brak zadań do wyświetlenia":`Wykonane zadania: ${doneCount} / ${totalCount}`;
-      // Definiujemy 10 kolorów od czerwonego do zielonego
-const rainbowColors = [
-    '#ff0000', // 0% - czerwony
-    '#ff5500', // 10%
-    '#ff9900', // 20%
-    '#ffaa00', // 30%
-    '#ffff00', // 40% - żółty
-    '#aaff00', // 50%
-    '#55ff00', // 60%
-    '#00ff55', // 70%
-    '#00ffaa', // 80%
-    '#00ff00'  // 100% - zielony
-];
+    const assignedSpan = document.createElement('div'); assignedSpan.className='task-assigned';
+    assignedSpan.textContent=`Przypisane do: ${t.assignedTo||'—'}`;
 
-// Obliczamy procent ukończonych zadań
-const progressPercent = totalCount === 0 ? 0 : Math.round((doneCount / totalCount) * 100);
+    infoDiv.appendChild(topDiv); infoDiv.appendChild(prioritySpan); infoDiv.appendChild(assignedSpan);
+    li.appendChild(check);
+    li.appendChild(infoDiv);
 
-// Obliczamy indeks koloru w tablicy
-const colorIndex = Math.floor((progressPercent / 100) * (rainbowColors.length - 1));
+    if(isAdmin){
+      const delBtn=document.createElement('span'); delBtn.className='delete';
+      delBtn.textContent='🗑️'; delBtn.addEventListener('click',()=>{if(confirm("Usuń zadanie?")) remove(ref(db,`tasks/${key}`));});
+      li.appendChild(delBtn);
+    }
 
-// Ustawiamy kolor nagłówka
-plannerTitle.style.background = rainbowColors[colorIndex];
-
-// Opcjonalnie zmiana koloru tekstu dla kontrastu (ciemny dla żółtych odcieni)
-
+    taskListEl.appendChild(li);
   }
 
-  onValue(tasksRef,(snapshot)=>{tasks=snapshot.val()||{}; renderTasks();});
+  taskCounter.textContent = totalCount===0?"Brak zadań do wyświetlenia":`Wykonane zadania: ${doneCount} / ${totalCount}`;
 
-  addTaskBtn.addEventListener('click',()=>{
-    const text = newTaskInput.value.trim();
-    if(!text) return alert('Wpisz treść zadania!');
-    const newTaskRef = ref(db, `tasks/${Date.now()}`);
-    set(newTaskRef,{
-      text,
-      done:false,
-      category:categorySelect.value,
-      priority:prioritySelect.value,
-      assignedTo:userSelect.value
-    });
-    newTaskInput.value='';
+  // 10 kolorów dla progresu
+  const rainbowColors = ['#ff0000','#ff5500','#ff9900','#ffaa00','#ffff00','#aaff00','#55ff00','#00ff55','#00ffaa','#00ff00'];
+  const progressPercent = totalCount===0?0:Math.round((doneCount/totalCount)*100);
+  const colorIndex = Math.floor((progressPercent/100)*(rainbowColors.length-1));
+  plannerTitle.style.background = rainbowColors[colorIndex];
+}
+
+onValue(tasksRef,(snapshot)=>{tasks=snapshot.val()||{}; renderTasks();});
+
+addTaskBtn.addEventListener('click',()=>{
+  const text = newTaskInput.value.trim();
+  if(!text) return alert('Wpisz treść zadania!');
+  const dailyReset = dailyResetCheckbox.checked;
+  const newTaskRef = ref(db, `tasks/${Date.now()}`);
+  set(newTaskRef,{
+    text,
+    done:false,
+    category:categorySelect.value,
+    priority:prioritySelect.value,
+    assignedTo:userSelect.value,
+    dailyReset: dailyReset
   });
+  newTaskInput.value='';
+  dailyResetCheckbox.checked = false;
+});
 
-  filterUser.addEventListener('change', renderTasks);
+filterUser.addEventListener('change', renderTasks);
 
-  let holdTimeout;
-  plannerTitle.addEventListener('mousedown',()=>holdTimeout=setTimeout(()=>{codePrompt.style.display='block'; adminCodeInput.focus();},1000));
-  plannerTitle.addEventListener('mouseup',()=>clearTimeout(holdTimeout));
-  plannerTitle.addEventListener('touchstart',()=>holdTimeout=setTimeout(()=>{codePrompt.style.display='block'; adminCodeInput.focus();},1000));
-  plannerTitle.addEventListener('touchend',()=>clearTimeout(holdTimeout));
+let holdTimeout;
+plannerTitle.addEventListener('mousedown',()=>holdTimeout=setTimeout(()=>{codePrompt.style.display='block'; adminCodeInput.focus();},1000));
+plannerTitle.addEventListener('mouseup',()=>clearTimeout(holdTimeout));
+plannerTitle.addEventListener('touchstart',()=>holdTimeout=setTimeout(()=>{codePrompt.style.display='block'; adminCodeInput.focus();},1000));
+plannerTitle.addEventListener('touchend',()=>clearTimeout(holdTimeout));
 
-  adminCodeInput.addEventListener('keydown',(e)=>{
-    if(e.key==='Enter'){
-      if(adminCodeInput.value==='0909'){
-        isAdmin=true; adminPanel.classList.add('active'); addTaskSection.style.display='flex';
-        codePrompt.style.display='none'; adminCodeInput.value='';
-      }else{alert('Nieprawidłowy kod PIN'); adminCodeInput.value='';}
+adminCodeInput.addEventListener('keydown',(e)=>{
+  if(e.key==='Enter'){
+    if(adminCodeInput.value==='0909'){
+      isAdmin=true; adminPanel.classList.add('active'); addTaskSection.style.display='flex';
+      codePrompt.style.display='none'; adminCodeInput.value='';
+    }else{alert('Nieprawidłowy kod PIN'); adminCodeInput.value='';}
+  }
+});
+
+hideAdminBtn.addEventListener('click',()=>{isAdmin=false; adminPanel.classList.remove('active'); addTaskSection.style.display='none';});
+
+loadNetworkDate();
+
+// 🔄 reset codziennych zadań
+(function resetDailyTasks() {
+  const lastResetKey = 'lastResetDay';
+  const today = new Date().toISOString().slice(0,10); // YYYY-MM-DD
+  const lastReset = localStorage.getItem(lastResetKey);
+
+  if(lastReset !== today) {
+    for(const key in tasks){
+      if(tasks[key].dailyReset){
+        update(ref(db, `tasks/${key}`), { done: false });
+      }
     }
-  });
-
-  hideAdminBtn.addEventListener('click',()=>{isAdmin=false; adminPanel.classList.remove('active'); addTaskSection.style.display='none';});
-
-  loadNetworkDate();
+    localStorage.setItem(lastResetKey, today);
+  }
+})();
 </script>
 
 </body>
