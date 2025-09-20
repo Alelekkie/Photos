@@ -5,163 +5,57 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Planner</title>
 <style>
-  body {
-    background: #000;
-    color: #f48fb1;
-    font-family: Arial, sans-serif;
-    margin: 0; padding: 0;
-  }
+  body { background: #000; color: #f48fb1; font-family: Arial, sans-serif; margin: 0; padding: 0; }
   header {
-    background: #1c1c1c;
-    padding: 1em;
-    text-align: center;
-    font-size: 1.5em;
-    user-select: none;
-  }
-  #dayTasksTitle {
-    font-size: 1.2em;
+  background: #f44336; /* początkowo czerwony */
+  color: #fff;
+  padding: 1em;
+  text-align: center;
+  font-size: 1.5em;
+  user-select: none;
+  transition: background-color 0.5s ease;
+}
+  #dayTasksTitle { font-size: clamp(1.2em, 6vw, 2em);
     margin-top: 0.2em;
-    color: #f48fb1cc;
-  }
-  #taskList {
-    list-style: none;
-    padding: 0.5em;
-    margin: 0;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  #taskList li {
-    background: #2b2b2b;
-    margin: 0.4em 0;
-    padding: 0.6em;
-    border-radius: 6px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    word-wrap: break-word;
-  }
-  #taskList li.done {
-    text-decoration: line-through;
-    opacity: 0.6;
-  }
-  .task-info {
-    flex-grow: 1;
-    margin-left: 1em;
-  }
-  .task-top {
-    display: flex;
-    justify-content: space-between;
-    font-weight: bold;
     color: #f48fb1;
-  }
-  .task-category {
-    font-style: italic;
-    opacity: 0.7;
-  }
-  .task-priority {
-    font-size: 0.85em;
-    opacity: 0.7;
-    margin-top: 0.2em;
-  }
-  .check, .delete {
-    cursor: pointer;
-    padding: 0 0.5em;
-    user-select: none;
-  }
-  .check {
-    font-size: 1.3em;
+    -webkit-text-stroke: 1px black;
+    text-stroke: 1px black;}
+    
+    #plannerTitle {
+       font-size: clamp(1.2em, 6vw, 2em);
+   
     color: #f48fb1;
-  }
-  .delete {
-    font-size: 1.2em;
-  }
-  #newTaskInput, select, button {
-    font-size: 1em;
-    padding: 0.5em;
-    margin: 0.3em 0.2em 0.3em 0;
-    border-radius: 6px;
-    border: none;
-  }
-  #newTaskInput {
-    width: 55%;
-    max-width: 400px;
-  }
-  button {
-    background: #f48fb1;
-    color: #000;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  button:hover {
-    background: #f06292;
-  }
-  #taskCounter {
-    text-align: center;
-    margin: 0.5em 0 1em 0;
-    font-size: 1em;
-    color: #f48fb1aa;
-  }
-  /* Panel admina */
-  #adminPanel {
-    background: #111;
-    color: #f48fb1;
-    padding: 1em;
-    max-width: 600px;
-    margin: 1em auto;
-    border-radius: 6px;
-    display: none;
-    flex-direction: column;
-    gap: 0.5em;
-  }
-  #adminPanel.active {
-    display: flex;
-  }
-  #codePrompt {
-    display: none;
-    text-align: center;
-    margin: 1em 0;
-  }
-  #adminCodeInput {
-    font-size: 1.2em;
-    padding: 0.3em;
-    width: 100px;
-    border-radius: 6px;
-    border: none;
-    text-align: center;
-  }
-
-  /* Priorytety kolorami */
-  .high {
-    border-left: 5px solid #ff4081;
-  }
-  .medium {
-    border-left: 5px solid #f48fb1;
-  }
-  .low {
-    border-left: 5px solid #f8bbd0;
-  }
-
-  /* Responsywność */
+    -webkit-text-stroke: 1px black;
+    text-stroke: 1px black;;
+    }
+  #taskList { list-style: none; padding: 0.5em; margin: 0; max-width: 600px; margin-left: auto; margin-right: auto; }
+  #taskList li { background: #2b2b2b; margin: 0.4em 0; padding: 0.6em; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; word-wrap: break-word; }
+  #taskList li.done { text-decoration: line-through; opacity: 0.6; }
+  .task-info { flex-grow: 1; margin-left: 1em; }
+  .task-top { display: flex; justify-content: space-between; font-weight: bold; color: #f48fb1; }
+  .task-category { font-style: italic; opacity: 0.7; }
+  .task-priority { font-size: 0.85em; opacity: 0.7; margin-top: 0.2em; }
+  .task-assigned { font-size: 0.85em; opacity: 0.8; margin-top: 0.2em; color: #bbb; }
+  .check, .delete { cursor: pointer; padding: 0 0.5em; user-select: none; }
+  .check { font-size: 1.3em; color: #f48fb1; }
+  .delete { font-size: 1.2em; }
+  #newTaskInput, select, button { font-size: 1em; padding: 0.5em; margin: 0.3em 0.2em 0.3em 0; border-radius: 6px; border: none; }
+  #newTaskInput { width: 40%; max-width: 400px; }
+  button { background: #f48fb1; color: #000; font-weight: bold; cursor: pointer; transition: background-color 0.3s ease; }
+  button:hover { background: #f06292; }
+  #taskCounter { text-align: center; margin: 0.5em 0 1em 0; font-size: 1em; color: #f48fb1aa; }
+  #adminPanel { background: #111; color: #f48fb1; padding: 1em; max-width: 600px; margin: 1em auto; border-radius: 6px; display: none; flex-direction: column; gap: 0.5em; }
+  #adminPanel.active { display: flex; }
+  #codePrompt { display: none; text-align: center; margin: 1em 0; }
+  #adminCodeInput { font-size: 1.2em; padding: 0.3em; width: 100px; border-radius: 6px; border: none; text-align: center; }
+  .high { border-left: 5px solid red; }
+  .medium { border-left: 5px solid yellow; }
+  .low { border-left: 5px solid green; }
   @media (max-width: 600px) {
-    #newTaskInput {
-      width: 100%;
-      margin-bottom: 0.5em;
-    }
-    #taskList li {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    .task-info {
-      margin-left: 0;
-      margin-top: 0.3em;
-      width: 100%;
-    }
-    .check, .delete {
-      align-self: flex-end;
-      padding: 0 0.3em;
-    }
+    #newTaskInput { width: 100%; margin-bottom: 0.5em; }
+    #taskList li { flex-direction: column; align-items: flex-start; }
+    .task-info { margin-left: 0; margin-top: 0.3em; width: 100%; }
+    .check, .delete { align-self: flex-end; padding: 0 0.3em; }
   }
 </style>
 </head>
@@ -173,8 +67,7 @@
 </header>
 
 <div style="max-width: 600px; margin: 0 auto; padding: 0 1em;">
-  <!-- Sekcja dodawania zadań - widoczna tylko dla admina -->
-  <div id="addTaskSection" style="display:none;">
+  <div id="addTaskSection" style="display:none; flex-wrap: wrap;">
     <input id="newTaskInput" type="text" placeholder="Nowe zadanie..." />
     <select id="categorySelect" aria-label="Kategoria zadania">
       <option value="Praca">Praca</option>
@@ -186,15 +79,30 @@
       <option value="medium" selected>Średni</option>
       <option value="low">Niski</option>
     </select>
+    <select id="userSelect" aria-label="Przypisz do osoby">
+      <option value="Paweł">Paweł</option>
+      <option value="Justyna">Justyna</option>
+      <option value="Klaudia">Klaudia</option>
+      <option value="Inne">Inne</option>
+    </select>
     <button id="addTaskBtn">Dodaj</button>
   </div>
 
-  <div id="taskCounter">Ładowanie zadań...</div>
+  <div style="text-align:center; margin: 0.5em 0;">
+    <label for="filterUser">Filtruj zadania: </label>
+    <select id="filterUser">
+      <option value="all">Wszyscy</option>
+      <option value="Paweł">Paweł</option>
+      <option value="Justyna">Justyna</option>
+      <option value="Klaudia">Klaudia</option>
+    </select>
+  </div>
 
+  <div id="taskCounter">Ładowanie zadań...</div>
+    
   <ul id="taskList"></ul>
 </div>
 
-<!-- Panel admina -->
 <div id="codePrompt">
   <input id="adminCodeInput" type="password" maxlength="4" placeholder="Podaj kod PIN" />
 </div>
@@ -230,13 +138,13 @@
   const db = getDatabase(app);
   const tasksRef = ref(db, 'tasks');
 
-  // DOM
   const plannerTitle = document.getElementById('plannerTitle');
   const dayTasksTitle = document.getElementById('dayTasksTitle');
   const taskListEl = document.getElementById('taskList');
   const newTaskInput = document.getElementById('newTaskInput');
   const categorySelect = document.getElementById('categorySelect');
   const prioritySelect = document.getElementById('prioritySelect');
+  const userSelect = document.getElementById('userSelect');
   const addTaskBtn = document.getElementById('addTaskBtn');
   const adminPanel = document.getElementById('adminPanel');
   const codePrompt = document.getElementById('codePrompt');
@@ -244,167 +152,133 @@
   const hideAdminBtn = document.getElementById('hideAdminBtn');
   const taskCounter = document.getElementById('taskCounter');
   const addTaskSection = document.getElementById('addTaskSection');
+  const filterUser = document.getElementById('filterUser');
 
   let tasks = {};
   let isAdmin = false;
 
-  // Aktualna data wyświetlana
   function loadNetworkDate() {
     const now = new Date();
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     dayTasksTitle.textContent = now.toLocaleDateString('pl-PL', options);
   }
 
-  // Renderowanie listy zadań
   function renderTasks() {
     taskListEl.innerHTML = '';
-    let doneCount = 0;
-    let totalCount = 0;
+    let doneCount = 0, totalCount = 0;
+    const selectedUser = filterUser.value;
 
     for (const key in tasks) {
       if (!tasks.hasOwnProperty(key)) continue;
       const t = tasks[key];
+      if(selectedUser !== 'all' && t.assignedTo !== selectedUser) continue;
+
       totalCount++;
-      if (t.done) doneCount++;
+      if(t.done) doneCount++;
 
       const li = document.createElement('li');
       li.className = t.priority || 'medium';
-      if (t.done) li.classList.add('done');
+      if(t.done) li.classList.add('done');
 
-      // Checkbox (dla użytkowników do odhaczania)
       const check = document.createElement('span');
       check.className = 'check';
       check.textContent = t.done ? '✔️' : '☐';
-      check.title = t.done ? "Kliknij, aby odznaczyć" : "Kliknij, aby odhaczyć";
+      check.addEventListener('click', ()=>update(ref(db, `tasks/${key}`), { done: !t.done }));
 
-      check.addEventListener('click', () => {
-        // Zmień status done w bazie
-        update(ref(db, `tasks/${key}`), { done: !t.done });
-      });
+      const infoDiv = document.createElement('div'); infoDiv.className = 'task-info';
+      const topDiv = document.createElement('div'); topDiv.className = 'task-top';
+      const taskText = document.createElement('span'); taskText.textContent = t.text;
+      const categorySpan = document.createElement('span'); categorySpan.className='task-category'; categorySpan.textContent=t.category||'';
+      topDiv.appendChild(taskText); topDiv.appendChild(categorySpan);
 
-      // Informacje o zadaniu
-      const infoDiv = document.createElement('div');
-      infoDiv.className = 'task-info';
+      const prioritySpan = document.createElement('div'); prioritySpan.className='task-priority';
+      switch(t.priority){case 'high':prioritySpan.textContent='Priorytet: Wysoki';break;
+      case 'medium':prioritySpan.textContent='Priorytet: Średni';break;
+      case 'low':prioritySpan.textContent='Priorytet: Niski';break;}
 
-      // Górna linia z treścią i kategorią
-      const topDiv = document.createElement('div');
-      topDiv.className = 'task-top';
-
-      const taskText = document.createElement('span');
-      taskText.textContent = t.text;
-
-      const categorySpan = document.createElement('span');
-      categorySpan.className = 'task-category';
-      categorySpan.textContent = t.category || '';
-
-      topDiv.appendChild(taskText);
-      topDiv.appendChild(categorySpan);
-
-      // Priorytet pod spodem
-      const prioritySpan = document.createElement('div');
-      prioritySpan.className = 'task-priority';
-      let prioText = '';
-      switch(t.priority) {
-        case 'high': prioText = 'Priorytet: Wysoki'; break;
-        case 'medium': prioText = 'Priorytet: Średni'; break;
-        case 'low': prioText = 'Priorytet: Niski'; break;
-      }
-      prioritySpan.textContent = prioText;
+      const assignedSpan = document.createElement('div'); assignedSpan.className='task-assigned';
+      assignedSpan.textContent=`Przypisane do: ${t.assignedTo||'—'}`;
 
       infoDiv.appendChild(topDiv);
       infoDiv.appendChild(prioritySpan);
+      infoDiv.appendChild(assignedSpan);
 
       li.appendChild(check);
       li.appendChild(infoDiv);
 
-      // Przyciski usuwania tylko dla admina
-      if (isAdmin) {
-        const delBtn = document.createElement('span');
-        delBtn.className = 'delete';
-        delBtn.textContent = '🗑️';
-        delBtn.title = "Usuń zadanie";
-        delBtn.style.color = '#f48fb1';
-        delBtn.addEventListener('click', () => {
-          if(confirm("Czy na pewno chcesz usunąć to zadanie?")) {
-            remove(ref(db, `tasks/${key}`));
-          }
-        });
+      if(isAdmin){
+        const delBtn=document.createElement('span'); delBtn.className='delete';
+        delBtn.textContent='🗑️'; delBtn.addEventListener('click',()=>{if(confirm("Usuń zadanie?")) remove(ref(db,`tasks/${key}`));});
         li.appendChild(delBtn);
       }
 
       taskListEl.appendChild(li);
     }
 
-    taskCounter.textContent = `Wykonane zadania: ${doneCount} / ${totalCount}`;
-    if(totalCount === 0) taskCounter.textContent = "Brak zadań na dziś";
+    taskCounter.textContent = totalCount===0?"Brak zadań do wyświetlenia":`Wykonane zadania: ${doneCount} / ${totalCount}`;
+      // Definiujemy 10 kolorów od czerwonego do zielonego
+const rainbowColors = [
+    '#ff0000', // 0% - czerwony
+    '#ff5500', // 10%
+    '#ff9900', // 20%
+    '#ffaa00', // 30%
+    '#ffff00', // 40% - żółty
+    '#aaff00', // 50%
+    '#55ff00', // 60%
+    '#00ff55', // 70%
+    '#00ffaa', // 80%
+    '#00ff00'  // 100% - zielony
+];
+
+// Obliczamy procent ukończonych zadań
+const progressPercent = totalCount === 0 ? 0 : Math.round((doneCount / totalCount) * 100);
+
+// Obliczamy indeks koloru w tablicy
+const colorIndex = Math.floor((progressPercent / 100) * (rainbowColors.length - 1));
+
+// Ustawiamy kolor nagłówka
+plannerTitle.style.background = rainbowColors[colorIndex];
+
+// Opcjonalnie zmiana koloru tekstu dla kontrastu (ciemny dla żółtych odcieni)
+
   }
 
-  // Nasłuchiwanie zmian z bazy
-  onValue(tasksRef, (snapshot) => {
-    tasks = snapshot.val() || {};
-    renderTasks();
-  });
+  onValue(tasksRef,(snapshot)=>{tasks=snapshot.val()||{}; renderTasks();});
 
-  // Dodawanie zadania (tylko admin)
-  addTaskBtn.addEventListener('click', () => {
+  addTaskBtn.addEventListener('click',()=>{
     const text = newTaskInput.value.trim();
-    if(text === '') return alert('Wpisz treść zadania!');
+    if(!text) return alert('Wpisz treść zadania!');
     const newTaskRef = ref(db, `tasks/${Date.now()}`);
-    set(newTaskRef, {
+    set(newTaskRef,{
       text,
-      done: false,
-      category: categorySelect.value,
-      priority: prioritySelect.value
+      done:false,
+      category:categorySelect.value,
+      priority:prioritySelect.value,
+      assignedTo:userSelect.value
     });
-    newTaskInput.value = '';
+    newTaskInput.value='';
   });
 
-  // Panel admina: pokazuj pole na kod PIN po przytrzymaniu nagłówka
+  filterUser.addEventListener('change', renderTasks);
+
   let holdTimeout;
-  plannerTitle.addEventListener('mousedown', () => {
-    holdTimeout = setTimeout(() => {
-      codePrompt.style.display = 'block';
-      adminCodeInput.focus();
-    }, 1000);
-  });
-  plannerTitle.addEventListener('mouseup', () => {
-    clearTimeout(holdTimeout);
-  });
-  plannerTitle.addEventListener('touchstart', () => {
-    holdTimeout = setTimeout(() => {
-      codePrompt.style.display = 'block';
-      adminCodeInput.focus();
-    }, 1000);
-  });
-  plannerTitle.addEventListener('touchend', () => {
-    clearTimeout(holdTimeout);
-  });
+  plannerTitle.addEventListener('mousedown',()=>holdTimeout=setTimeout(()=>{codePrompt.style.display='block'; adminCodeInput.focus();},1000));
+  plannerTitle.addEventListener('mouseup',()=>clearTimeout(holdTimeout));
+  plannerTitle.addEventListener('touchstart',()=>holdTimeout=setTimeout(()=>{codePrompt.style.display='block'; adminCodeInput.focus();},1000));
+  plannerTitle.addEventListener('touchend',()=>clearTimeout(holdTimeout));
 
-  // Weryfikacja PIN
-  adminCodeInput.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter') {
-      if(adminCodeInput.value === '0909') {
-        isAdmin = true;
-        adminPanel.classList.add('active');
-        addTaskSection.style.display = 'flex';
-        codePrompt.style.display = 'none';
-        adminCodeInput.value = '';
-      } else {
-        alert('Nieprawidłowy kod PIN');
-        adminCodeInput.value = '';
-      }
+  adminCodeInput.addEventListener('keydown',(e)=>{
+    if(e.key==='Enter'){
+      if(adminCodeInput.value==='0909'){
+        isAdmin=true; adminPanel.classList.add('active'); addTaskSection.style.display='flex';
+        codePrompt.style.display='none'; adminCodeInput.value='';
+      }else{alert('Nieprawidłowy kod PIN'); adminCodeInput.value='';}
     }
   });
 
-  // Ukrywanie panelu admina
-  hideAdminBtn.addEventListener('click', () => {
-    isAdmin = false;
-    adminPanel.classList.remove('active');
-    addTaskSection.style.display = 'none';
-  });
+  hideAdminBtn.addEventListener('click',()=>{isAdmin=false; adminPanel.classList.remove('active'); addTaskSection.style.display='none';});
 
   loadNetworkDate();
-
 </script>
 
 </body>
