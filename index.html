@@ -101,8 +101,10 @@
 </div>
 <div id="adminPanel">
   <button id="hideAdminBtn">✖️ Zamknij panel admina</button>
+  <button id="resetAllBtn">🔄 Odznacz wszystkie</button>
   <p>Panel admina aktywny. Możesz usuwać zadania klikając kosz.</p>
 </div>
+
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
@@ -192,12 +194,51 @@ function renderTasks() {
     li.appendChild(check);
     li.appendChild(infoDiv);
 
-    if(isAdmin){
-      const delBtn=document.createElement('span'); delBtn.className='delete';
-      delBtn.textContent='🗑️'; delBtn.addEventListener('click',()=>{if(confirm("Usuń zadanie?")) remove(ref(db,`tasks/${key}`));});
-      li.appendChild(delBtn);
-    }
+    if (isAdmin) {
+  // 🗑️ delete
+  const delBtn = document.createElement('span');
+  delBtn.className = 'delete';
+  delBtn.textContent = '🗑️';
+  delBtn.addEventListener('click', () => {
+    if (confirm("Usuń zadanie?")) remove(ref(db, `tasks/${key}`));
+  });
+  li.appendChild(delBtn);
 
+  // ✏️ edit
+  const editBtn = document.createElement('span');
+  editBtn.className = 'edit';
+  editBtn.textContent = '✏️';
+  editBtn.style.cursor = 'pointer';
+  editBtn.addEventListener('click', () => {
+    const newText = prompt("Treść zadania:", t.text);
+    if (newText === null) return;
+
+    const newCategory = prompt("Kategoria (Praca/Dom/Inne):", t.category || 'Praca');
+    if (newCategory === null) return;
+
+    const newPriority = prompt("Priorytet (high/medium/low):", t.priority || 'medium');
+    if (newPriority === null) return;
+
+    const newAssigned = prompt("Przypisane do:", t.assignedTo || 'Paweł');
+    if (newAssigned === null) return;
+
+    update(ref(db, `tasks/${key}`), {
+      text: newText,
+      category: newCategory,
+      priority: newPriority,
+      assignedTo: newAssigned
+    });
+  });
+  li.appendChild(editBtn);
+}
+
+
+      
+      
+      
+      
+      
+      
     taskListEl.appendChild(li);
   }
 
@@ -210,7 +251,12 @@ function renderTasks() {
   plannerTitle.style.background = rainbowColors[colorIndex];
 }
 
-onValue(tasksRef,(snapshot)=>{tasks=snapshot.val()||{}; renderTasks();});
+onValue(tasksRef, (snapshot) => {
+  tasks = snapshot.val() || {};
+  renderTasks();
+  resetDailyTasks(); // 🔥 tu dodajemy reset po wczytaniu zadań
+});
+
 
 addTaskBtn.addEventListener('click',()=>{
   const text = newTaskInput.value.trim();
@@ -247,24 +293,34 @@ adminCodeInput.addEventListener('keydown',(e)=>{
 });
 
 hideAdminBtn.addEventListener('click',()=>{isAdmin=false; adminPanel.classList.remove('active'); addTaskSection.style.display='none';});
+const resetAllBtn = document.getElementById('resetAllBtn');
+
+resetAllBtn.addEventListener('click', () => {
+  if (confirm("Na pewno odznaczyć wszystkie zadania?")) {
+    for (const key in tasks) {
+      update(ref(db, `tasks/${key}`), { done: false });
+    }
+  }
+});
 
 loadNetworkDate();
 
 // 🔄 reset codziennych zadań
-(function resetDailyTasks() {
+function resetDailyTasks() {
   const lastResetKey = 'lastResetDay';
   const today = new Date().toISOString().slice(0,10); // YYYY-MM-DD
   const lastReset = localStorage.getItem(lastResetKey);
 
-  if(lastReset !== today) {
-    for(const key in tasks){
-      if(tasks[key].dailyReset){
+  if (lastReset !== today) {
+    for (const key in tasks) {
+      if (tasks[key].dailyReset) {
         update(ref(db, `tasks/${key}`), { done: false });
       }
     }
     localStorage.setItem(lastResetKey, today);
   }
-})();
+}
+
 </script>
 
 </body>
