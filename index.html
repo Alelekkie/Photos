@@ -47,40 +47,16 @@
     .check, .delete { align-self: flex-end; padding: 0 0.3em; }
   }
     
-  #taskDoneOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 200, 0, 0.7); /* lekka zieleń */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  opacity: 0;
-  pointer-events: none; /* nie blokuje kliknięć */
-  transition: opacity 0.3s ease;
+  .flash {
+  animation: flashAnim 0.8s ease;
 }
 
-#taskDoneOverlay.show {
-  opacity: 1;
+@keyframes flashAnim {
+  0% { background-color: #2b2b2b; }
+  50% { background-color: #4caf50; }
+  100% { background-color: #2b2b2b; }
 }
 
-.overlay-content {
-  font-size: 10rem; /* duży ptaszek */
-  color: white;     /* biały ptaszek */
-  text-shadow: 0 0 15px rgba(255,255,255,0.7);
-  animation: pop 0.6s ease;
-}
-
-@keyframes pop {
-  0% { transform: scale(0.5); opacity: 0; }
-  50% { transform: scale(1.2); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-    
     
 
 
@@ -202,23 +178,43 @@ function renderTasks() {
     totalCount++;
     if(t.done) doneCount++;
 
-    const li = document.createElement('li');
-    li.className = t.priority || 'medium';
-    if(t.done) li.classList.add('done');
+   const li = document.createElement('li');
+li.className = t.priority || 'medium';
+if(t.done) li.classList.add('done');
 
-    const check = document.createElement('span');
-    check.className = 'check';
-    check.textContent = t.done ? '✔️' : '☐';
-    const overlay = document.getElementById('taskDoneOverlay');
+// Tworzymy element checkbox
+const check = document.createElement('span');
+check.className = 'check';
+check.textContent = t.done ? '✔️' : '☐';
+li.appendChild(check);
+
 
 check.addEventListener('click', async () => {
   const newDoneState = !t.done;
   await update(ref(db, `tasks/${key}`), { done: newDoneState });
 
-  // Pokaz overlay tylko jeśli zaznaczono jako done
   if (!t.done && newDoneState) {
-    overlay.classList.add('show');
-    setTimeout(() => overlay.classList.remove('show'), 1000); // znika po 1 sekundzie
+    // flash animacja li
+    li.classList.add('flash');
+    setTimeout(() => li.classList.remove('flash'), 800);
+
+    // dźwięk
+    const sound = document.getElementById('taskDoneSound');
+    sound.currentTime = 0;
+    sound.play();
+
+    // konfetti
+    confetti({
+      particleCount: 50,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#4caf50', '#a5d6a7', '#c8e6c9']
+    });
+
+    // zmiana checkboxa na ✔️
+    check.textContent = '✔️';
+  } else {
+    check.textContent = '☐';
   }
 });
 
@@ -377,7 +373,9 @@ function resetDailyTasks() {
   <div class="overlay-content">✔️</div>
 </div>
 
-    
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<audio id="taskDoneSound" src="https://freesound.org/data/previews/341/341695_6245633-lq.mp3"></audio>
+
 
 </body>
 </html>
