@@ -46,6 +46,34 @@
     .task-info { margin-left: 0; margin-top: 0.3em; width: 100%; }
     .check, .delete { align-self: flex-end; padding: 0 0.3em; }
   }
+    
+  #taskDoneOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 255, 0, 0.9); /* lekka zieleń */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 10rem;
+  color: white !important;
+  z-index: 9999;
+  pointer-events: none; /* nie blokuje kliknięć */
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+#taskDoneOverlay.show {
+  opacity: 1;
+  transform: scale(1.2); /* lekko powiększony */
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+    
+    
+
+
+
 </style>
 </head>
 <body>
@@ -170,7 +198,19 @@ function renderTasks() {
     const check = document.createElement('span');
     check.className = 'check';
     check.textContent = t.done ? '✔️' : '☐';
-    check.addEventListener('click', ()=>update(ref(db, `tasks/${key}`), { done: !t.done }));
+    const overlay = document.getElementById('taskDoneOverlay');
+
+check.addEventListener('click', async () => {
+  const newDoneState = !t.done;
+  await update(ref(db, `tasks/${key}`), { done: newDoneState });
+
+  // Pokaz overlay tylko jeśli zaznaczono jako done
+  if (!t.done && newDoneState) {
+    overlay.classList.add('show');
+    setTimeout(() => overlay.classList.remove('show'), 1000); // znika po 1 sekundzie
+  }
+});
+
 
     const infoDiv = document.createElement('div'); infoDiv.className = 'task-info';
     const topDiv = document.createElement('div'); topDiv.className = 'task-top';
@@ -322,6 +362,8 @@ function resetDailyTasks() {
 }
 
 </script>
+<div id="taskDoneOverlay">✔️</div>
+    
 
 </body>
 </html>
