@@ -53,22 +53,33 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 255, 0, 0.9); /* lekka zieleń */
+  background-color: rgba(0, 200, 0, 0.7); /* lekka zieleń */
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 10rem;
-  color: white !important;
   z-index: 9999;
-  pointer-events: none; /* nie blokuje kliknięć */
   opacity: 0;
+  pointer-events: none; /* nie blokuje kliknięć */
   transition: opacity 0.3s ease;
 }
+
 #taskDoneOverlay.show {
   opacity: 1;
-  transform: scale(1.2); /* lekko powiększony */
-  transition: opacity 0.3s ease, transform 0.3s ease;
 }
+
+.overlay-content {
+  font-size: 10rem; /* duży ptaszek */
+  color: white;     /* biały ptaszek */
+  text-shadow: 0 0 15px rgba(255,255,255,0.7);
+  animation: pop 0.6s ease;
+}
+
+@keyframes pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
     
     
 
@@ -362,7 +373,10 @@ function resetDailyTasks() {
 }
 
 </script>
-<div id="taskDoneOverlay">✔️</div>
+<div id="taskDoneOverlay">
+  <div class="overlay-content">✔️</div>
+</div>
+
     
 
 </body>
