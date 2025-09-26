@@ -90,9 +90,7 @@
       <option value="Inne">Inne</option>
     </select>
 
-    <label style="margin-left:0.5em;">
-      <input type="checkbox" id="dailyResetCheckbox" /> Resetuj codziennie
-    </label>
+    
 
     <button id="addTaskBtn">Dodaj</button>
   </div>
@@ -353,20 +351,7 @@ resetAllBtn.addEventListener('click', () => {
 loadNetworkDate();
 
 // 🔄 reset codziennych zadań
-function resetDailyTasks() {
-  const lastResetKey = 'lastResetDay';
-  const today = new Date().toISOString().slice(0,10); // YYYY-MM-DD
-  const lastReset = localStorage.getItem(lastResetKey);
 
-  if (lastReset !== today) {
-    for (const key in tasks) {
-      if (tasks[key].dailyReset) {
-        update(ref(db, `tasks/${key}`), { done: false });
-      }
-    }
-    localStorage.setItem(lastResetKey, today);
-  }
-}
 
 </script>
 
@@ -377,4 +362,3 @@ function resetDailyTasks() {
 
 </body>
 </html>
-
